@@ -68,3 +68,57 @@ cmake --build build --config Release
 set CXXFLAGS=/MT /EHsc
 cargo build --release --target x86_64-pc-windows-msvc
 ```
+
+First select a model on Hugging Face. 
+
+Here are some suggestions:
+
+|Size|Dimesnions|Model|
+|-|-:|-|
+|Large|1024|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|
+|Medium|768|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|
+|Small|384|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|
+
+## Models
+
+You need to first convert the model to `ct2` format. Optionally you might want to quantise the weights.
+
+Setup `ctranslate2` in `venv`.
+
+```
+cd ~/
+mkdir ctranslate2 
+cd ctranslate2
+python3 -m venv .venv
+source .venv/bin/activate
+pip install torch
+pip install ctranslate2 transformers
+```
+For the small, medium, large models listed above:
+
+```
+mkdir small
+ct2-transformers-converter \
+  --model sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 \
+  --output_dir small \
+  --force \
+  --quantization int8
+```
+
+```
+mkdir medium
+ct2-transformers-converter \
+  --model sentence-transformers/paraphrase-multilingual-mpnet-base-v2 \
+  --output_dir medium \
+  --force \
+  --quantization int8
+```
+
+```
+mkdir large
+ct2-transformers-converter \
+  --model intfloat/multilingual-e5-large \
+  --output_dir large \
+  --force \
+  --quantization int8
+```
