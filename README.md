@@ -73,11 +73,11 @@ First select a model on Hugging Face.
 
 Here are some suggestions:
 
-|Size|Dimesnions|Model|
-|-|-:|-|
-|Large|1024|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|
-|Medium|768|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|
-|Small|384|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|
+|Scale|Dimesnions|Model|Size on Disk|
+|-|-:|-|-:|
+|Large|1024|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|587.1 MB|
+|Medium|768|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|296.2 MB| 
+|Small|384|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|135.4 MB| 
 
 ## Models
 
