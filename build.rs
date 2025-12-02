@@ -22,7 +22,7 @@ fn main() {
     
     // --- START: Add the /MT flag for static runtime linking ---
     if cfg!(target_env = "msvc") {
-        bridge.flag_link("/nodefaultlib:msvcrt.lib");
+        bridge.flag("/nodefaultlib:msvcrt.lib");
         bridge.flag("/MT");
     }
 
