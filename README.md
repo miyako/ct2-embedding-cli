@@ -50,6 +50,21 @@ cargo build --release --target x86_64-apple-darwin
 ### Windows
 
 ```
+git clone https://github.com/OpenNMT/CTranslate2 --recursive
+cd CTranslate2
+cmake -S . -B build -A x64 \
+ -DBUILD_SHARED_LIBS=OFF \
+ -DCMAKE_BUILD_TYPE=Release \
+ -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+ -DWITH_DNNL=OFF \
+ -DWITH_OPENMP=ON \
+ -DWITH_MKL=OFF \
+ -DENABLE_DNNL=OFF \
+ -DDNNL_CPU_RUNTIME=OMP \
+ -DWITH_CPU_DISPATCH=OFF \
+ -DCTRANSLATE2_BUILD_SINGLE_ISA=OFF \
+ -DOPENMP_RUNTIME=COMP
+cmake --build build --config Release
 set CXXFLAGS=/MT /EHsc
 cargo build --release --target x86_64-pc-windows-msvc
 ```
