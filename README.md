@@ -1,7 +1,9 @@
 # ct2-embedding-cli
 CLI to generate embeddings
 
-### Usage 
+## Abstract
+
+**CTranslate2** is an engine highly optimised for fast local inference, especially **quantised transformer-based models**. For a simple task like generating embeddings for the purpose of semantic database search, a chat-oriented LLM frameworks like llama.cpp might be an overkill. This CLI tool leverages `ct2` for such use cases.
 
 ```
 Usage: ct2-embedding-cli [OPTIONS] --model <MODEL>
@@ -19,19 +21,15 @@ Options:
 > **Valid device names**: `auto`, `cuda`, `cpu`  
 > **Pipe**: omit `--text` and use `stdIn` instead
 
-### Abstract
-
-**CTranslate2** is an engine highly optimised for fast local inference, especially **quantised transformer-based models**. For a simple task like generating embeddings for the purpose of semantic database search, a chat-oriented LLM frameworks like llama.cpp might be an overkill. This CLI tool leverages `ct2` for such use cases.
-
-### Design
+## Design
 
 Rust is used to tokenise input text. C++ is used to encode tokens and mean pool embeddings. Rust is also used to run a simple HTTP server.
 
-### Setup
+## Usage
 
-First select a model on Hugging Face. 
+Find a transformer based model on Hugging Face. 
 
-Here are some suggestions:
+### Models
 
 |Scale|Dimesnions|Model|Size on Disk|
 |-|-:|-|-:|
@@ -39,7 +37,8 @@ Here are some suggestions:
 |Medium|`768`|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|`296.2 MB`| 
 |Small|`384`|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|`135.4 MB`| 
 
-## Models
+> [!TIP]
+> Converted model are available in releases.
 
 You need to convert the model to `ct2` format. Optionally you might want to quantise the weights.
 
