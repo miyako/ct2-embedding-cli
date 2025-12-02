@@ -17,9 +17,9 @@ Options:
   -h, --help             Print help
   -V, --version          Print version
 ```
-
-> **Valid device names**: `auto`, `cuda`, `cpu`  
-> **Pipe**: omit `--text` and use `stdIn` instead
+  
+> [!NOTE]
+> You can omit `--text` and use `stdIn` instead.
 
 ## Design
 
