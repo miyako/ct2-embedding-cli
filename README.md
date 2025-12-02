@@ -15,8 +15,11 @@ cmake -S . -B build_arm \
     -DENABLE_CPU_DISPATCH=OFF \
     -DWITH_OPENBLAS=ON \
     -DOPENMP_RUNTIME=COMP \
-    -DOPENMP_C_INCLUDE_DIR="..." \
-    -DOPENMP_CXX_INCLUDE_DIR="..." \
-    -DOPENMP_LIBOMP_LIBRARY="..." \
-    -DOPENBLAS_INCLUDE_DIR="..."
+    -DOpenMP_CXX_INCLUDE_DIR="..." \
+    -DOpenMP_CXX_INCLUDE_DIR="..." \
+    -DOpenMP_libomp_LIBRARY="..." \
+    -DOPENBLAS_INCLUDE_DIR="..." \
+    -DOPENBLAS_LIBRARY="..."
 ``` 
+
+remove `'-Xclang -fopenmp'` from Other C++ flags.
