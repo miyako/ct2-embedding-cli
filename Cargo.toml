@@ -11,6 +11,10 @@ clap = { version = "4.4", features = ["derive"] }
 tokenizers = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+# New dependencies for Server Mode
+tokio = { version = "1.0", features = ["full"] }
+axum = "0.7"
+atty = "0.2"
 
 [build-dependencies]
 cxx-build = "1.0"
