@@ -162,6 +162,18 @@ set CXXFLAGS=/MT /EHsc
 cargo build --release --target x86_64-pc-windows-msvc
 ```
 
+> [!WARNING]
+> brew static lib seems broken (ARM ABI includes `___emutls_get_address`); build OpenBLAS from source. 
+
+```
+# Clean clone/source directory
+git clone https://github.com/OpenMathLib/OpenBLAS.git
+cd OpenBLAS
+# Use explicit target for Apple Silicon and force use of the native Apple Clang compiler
+# TARGET=ARMV8 works well for M-series chips.
+make DYNAMIC_ARCH=0 TARGET=ARMV8 CC=clang FC=gfortran
+```
+
 ---
 
 ## Examples
