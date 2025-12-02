@@ -17,9 +17,20 @@ fn main() {
         println!("cargo:rustc-link-lib=static=ctranslate2"); 
         println!("cargo:rustc-link-lib=static=utils"); 
     }
+    
+    let mut bridge = cxx_build::bridge("src/main.rs");
+    
+    // --- START: Add the /MT flag for static runtime linking ---
+    if cfg!(target_env = "msvc") {
+        // Use the /MT flag for Release builds (Multi-threaded Static)
+        // or /MTd for Debug builds (Multi-threaded Debug Static).
+        // Since cargo build defaults to Release, we use /MT.
+        // If you need debug builds, you'd check for target_cfg = "debug"
+        // and set the flag to /MTd.
+        bridge.flag("/MT");
+    }
 
-    cxx_build::bridge("src/main.rs")
-        .file("src/cpp/embedding_bridge.cc")
+    bridge.file("src/cpp/embedding_bridge.cc")
         .flag_if_supported("-std=c++17")
         .include("include") 
         .include("src/cpp") 
