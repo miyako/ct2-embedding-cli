@@ -22,11 +22,7 @@ fn main() {
     
     // --- START: Add the /MT flag for static runtime linking ---
     if cfg!(target_env = "msvc") {
-        // Use the /MT flag for Release builds (Multi-threaded Static)
-        // or /MTd for Debug builds (Multi-threaded Debug Static).
-        // Since cargo build defaults to Release, we use /MT.
-        // If you need debug builds, you'd check for target_cfg = "debug"
-        // and set the flag to /MTd.
+        bridge.flag_link("/nodefaultlib:msvcrt.lib");
         bridge.flag("/MT");
     }
 
