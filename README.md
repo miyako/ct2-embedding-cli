@@ -41,7 +41,7 @@ Here are some suggestions:
 
 ## Models
 
-You need to first convert the model to `ct2` format. Optionally you might want to quantise the weights.
+You need to convert the model to `ct2` format. Optionally you might want to quantise the weights.
 
 Setup `ctranslate2` in `venv`.
 
@@ -83,6 +83,12 @@ ct2-transformers-converter \
   --quantization int8
 ```
 
+The converter script generates `3` files. You need to download `2` more:
+
+* tokenizer_config.json
+* tokenizer.json
+
+Now you can use the CLI.
 
 ---
 
