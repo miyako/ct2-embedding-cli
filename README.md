@@ -43,4 +43,11 @@ cmake -S . -B build_amd \
     -DOPENBLAS_INCLUDE_DIR="..." \
     -DOPENBLAS_LIBRARY="..."
 cmake --build build_amd --config Release
-``` 
+```
+
+### Windows
+
+```
+set CXXFLAGS=/MT /EHsc
+cargo build --release --target x86_64-pc-windows-msvc
+```
