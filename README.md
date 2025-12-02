@@ -122,3 +122,30 @@ ct2-transformers-converter \
   --force \
   --quantization int8
 ```
+
+## CLI
+
+You can now convert a text to vectors like so
+
+```
+ct2-embedding-cli \
+   -m /Users/miyako/Documents/GitHub/ct2-embedding-cli/models/large
+   -t "If I am not for myself, who will be for me? And if I am only for myself, what am I? And if not now, when?"
+Generated Embedding Vector (Size: 34816):
+[0.9075532, 0.73017204, -0.96385884, -1.0773305, 0.56636286, -0.6996522, -0.99128413, 1.0444531, 2.2073429, -1.0438899]
+```
+
+```
+ct2-embedding-cli \
+   -m /Users/miyako/Documents/GitHub/ct2-embedding-cli/models/medium
+   -t "If I am not for myself, who will be for me? And if I am only for myself, what am I? And if not now, when?"
+Generated Embedding Vector (Size: 26112):
+[0.13720347, -0.040625297, -0.0046865623, 0.069453046, -0.038324688, -0.047868043, 0.011250849, -0.18425152, 0.17645219, -0.009526617]
+```
+
+```
+ct2-embedding-cli -m /Users/miyako/Documents/GitHub/ct2-embedding-cli/models/small
+   -t "If I am not for myself, who will be for me? And if I am only for myself, what am I? And if not now, when?"
+Generated Embedding Vector (Size: 384):
+[0.016460087, -0.11727273, 0.025516136, 0.033093385, 0.02568352, 0.015095918, 0.0033053188, 0.009695337, -0.06317781, 0.080003306]
+```
