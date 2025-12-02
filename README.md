@@ -29,8 +29,6 @@ Rust is used to tokenise input text. C++ is used to encode tokens and mean pool 
 
 Find a transformer based model on Hugging Face. 
 
-### Models
-
 |Scale|Dimesnions|Model|Size on Disk|
 |-|-:|-|-:|
 |Large|`1024`|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|`587.1 MB`|
