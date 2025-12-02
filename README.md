@@ -1,6 +1,26 @@
 # ct2-embedding-cli
 CLI to generate embeddings
 
+## Usage 
+
+```
+Usage: ct2-embedding-cli [OPTIONS] --model <MODEL>
+
+Options:
+  -m, --model <MODEL>    
+  -t, --text <TEXT>      
+  -d, --device <DEVICE>  [default: cpu]
+      --server           Run in HTTP server mode
+      --port <PORT>      Port to listen on (only used in server mode) [default: 3000]
+  -h, --help             Print help
+  -V, --version          Print version
+```
+
+**Valid device names**: `auto`, `cuda`, `cpu`  
+**Pipe**: omit `--text` and use `stdIn` instead
+
+
+
 ### Apple
 
 * Build Ctranslate2 with optimisation
