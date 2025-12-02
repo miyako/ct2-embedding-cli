@@ -1,7 +1,7 @@
 # ct2-embedding-cli
 CLI to generate embeddings
 
-## Usage 
+### Usage 
 
 ```
 Usage: ct2-embedding-cli [OPTIONS] --model <MODEL>
@@ -16,14 +16,81 @@ Options:
   -V, --version          Print version
 ```
 
-**Valid device names**: `auto`, `cuda`, `cpu`  
-**Pipe**: omit `--text` and use `stdIn` instead
+> **Valid device names**: `auto`, `cuda`, `cpu`  
+> **Pipe**: omit `--text` and use `stdIn` instead
+
+### Abstract
+
+**CTranslate2** is an engine highly optimised for fast local inference, especially **quantised transformer-based models**. For a simple task like generating embeddings for the purpose of semantic database search, a chat-oriented LLM frameworks like llama.cpp might be an overkill. This CLI tool leverages `ct2` for such use cases.
+
+### Design
+
+Rust is used to tokenise input text. C++ is used to encode tokens and mean pool embeddings. Rust is also used to run a simple HTTP server.
+
+### Setup
+
+First select a model on Hugging Face. 
+
+Here are some suggestions:
+
+|Scale|Dimesnions|Model|Size on Disk|
+|-|-:|-|-:|
+|Large|`1024`|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|`587.1 MB`|
+|Medium|`768`|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|`296.2 MB`| 
+|Small|`384`|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|`135.4 MB`| 
+
+## Models
+
+You need to first convert the model to `ct2` format. Optionally you might want to quantise the weights.
+
+Setup `ctranslate2` in `venv`.
+
+```
+cd ~/
+mkdir ctranslate2 
+cd ctranslate2
+python3 -m venv .venv
+source .venv/bin/activate
+pip install torch
+pip install ctranslate2 transformers
+```
+For the small, medium, large models listed above:
+
+```
+mkdir small
+ct2-transformers-converter \
+  --model sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 \
+  --output_dir small \
+  --force \
+  --quantization int8
+```
+
+```
+mkdir medium
+ct2-transformers-converter \
+  --model sentence-transformers/paraphrase-multilingual-mpnet-base-v2 \
+  --output_dir medium \
+  --force \
+  --quantization int8
+```
+
+```
+mkdir large
+ct2-transformers-converter \
+  --model intfloat/multilingual-e5-large \
+  --output_dir large \
+  --force \
+  --quantization int8
+```
 
 
+---
 
-### Apple
+## Developer Notes
 
-* Build Ctranslate2 with optimisation
+### Apple Silicon
+
+* Build Ctranslate2 with accelerate framework
 
 ```
 git clone https://github.com/OpenNMT/CTranslate2 --recursive
@@ -89,63 +156,9 @@ set CXXFLAGS=/MT /EHsc
 cargo build --release --target x86_64-pc-windows-msvc
 ```
 
-First select a model on Hugging Face. 
+---
 
-Here are some suggestions:
-
-|Scale|Dimesnions|Model|Size on Disk|
-|-|-:|-|-:|
-|Large|1024|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|587.1 MB|
-|Medium|768|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|296.2 MB| 
-|Small|384|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|135.4 MB| 
-
-## Models
-
-You need to first convert the model to `ct2` format. Optionally you might want to quantise the weights.
-
-Setup `ctranslate2` in `venv`.
-
-```
-cd ~/
-mkdir ctranslate2 
-cd ctranslate2
-python3 -m venv .venv
-source .venv/bin/activate
-pip install torch
-pip install ctranslate2 transformers
-```
-For the small, medium, large models listed above:
-
-```
-mkdir small
-ct2-transformers-converter \
-  --model sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 \
-  --output_dir small \
-  --force \
-  --quantization int8
-```
-
-```
-mkdir medium
-ct2-transformers-converter \
-  --model sentence-transformers/paraphrase-multilingual-mpnet-base-v2 \
-  --output_dir medium \
-  --force \
-  --quantization int8
-```
-
-```
-mkdir large
-ct2-transformers-converter \
-  --model intfloat/multilingual-e5-large \
-  --output_dir large \
-  --force \
-  --quantization int8
-```
-
-## CLI
-
-You can now convert a text to vectors like so
+## Examples
 
 ```
 ct2-embedding-cli -m /Users/miyako/Documents/GitHub/ct2-embedding-cli/models/small
