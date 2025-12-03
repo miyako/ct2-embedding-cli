@@ -1,5 +1,6 @@
 use clap::Parser;
 use tokenizers::Tokenizer;
+use std::path::Path;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use std::io::{self, Read};
@@ -39,14 +40,28 @@ unsafe impl Sync for ffi::EmbeddingModel {}
 
 #[derive(Serialize, Debug)]
 struct EmbeddingOutput {
-    text: String,
-    ids: Vec<u32>,
-    embeddings: Vec<f32>,
+    model: String,
+    object: String,
+    usage: EmbeddingOutputUsage,
+    data: Vec<EmbeddingOutputData>,
+}
+
+#[derive(Serialize, Debug)]
+struct EmbeddingOutputUsage {
+    prompt_tokens: u32,
+    total_tokens: u32,
+}
+
+#[derive(Serialize, Clone, Debug)]
+struct EmbeddingOutputData {
+    embedding: Vec<f32>,
+    index: u32,
+    object: String,
 }
 
 #[derive(Deserialize, Debug)]
 struct EmbeddingRequest {
-    text: String,
+    input: String,
 }
 
 #[derive(Parser, Debug)]
@@ -72,21 +87,28 @@ struct Args {
 
 // Container to hold the heavy resources (Model + Tokenizer).
 // We wrap the C++ model in a wrapper because we can't easily clone UniquePtr.
-struct ModelContext {
+pub struct ModelContext {
     tokenizer: Tokenizer,
     model: cxx::UniquePtr<ffi::EmbeddingModel>,
 }
 
 // Since cxx::UniquePtr is Send but not Sync (usually), and we are sharing it
 // across async threads, we will wrap the Context in a Mutex.
-type SharedState = Arc<Mutex<ModelContext>>;
+pub struct AppState {
+    // This is read-only configuration, so no Mutex needed
+    pub name: String, 
+    // This needs to be mutable/thread-safe, so we wrap it in Mutex
+    pub context: Mutex<ModelContext>, 
+}
+type SharedState = Arc<AppState>;
 
 // --- Logic ---
 
 // Helper function to perform the actual logic, used by both CLI and Server
 fn compute_embeddings(
     ctx: &ModelContext, 
-    text: String
+    text: String,
+    model_name: String,
 ) -> anyhow::Result<EmbeddingOutput> {
     if text.is_empty() {
         anyhow::bail!("Input text is empty");
@@ -103,12 +125,27 @@ fn compute_embeddings(
     // Note: This blocks the thread. In a high-throughput async environment,
     // you might want to use spawn_blocking, but for simplicity here we call directly.
     let output_flat = ctx.model.encode(&ids, &lengths);
-
+    let model = model_name.to_string();
+    let prompt_tokens = ids.len().try_into().unwrap();
+    let total_tokens = prompt_tokens;
+        
+    let usage = EmbeddingOutputUsage {
+       prompt_tokens,
+       total_tokens,
+    };
+    
+    let data = [EmbeddingOutputData {
+        embedding: output_flat,
+        index: 0,
+        object: "embedding".to_string(),
+    }].to_vec();
+    
     // 3. Construct Output
     Ok(EmbeddingOutput {
-        text,
-        ids,
-        embeddings: output_flat,
+        model,
+        object: "list".to_string(),
+        usage,
+        data,
     })
 }
 
@@ -118,11 +155,13 @@ async fn embedding_handler(
     State(state): State<SharedState>,
     Json(payload): Json<EmbeddingRequest>,
 ) -> Result<Json<EmbeddingOutput>, (StatusCode, String)> {
-    // Acquire lock on the model
-    let ctx = state.lock().await;
-
+    // 1. Access the name directly (No lock required!)
+    let model_name = state.name.clone(); 
+    // 2. Acquire lock on the model
+    let ctx = state.context.lock().await;
+    
     // Run computation
-    match compute_embeddings(&ctx, payload.text) {
+    match compute_embeddings(&ctx, payload.input, model_name) {
         Ok(output) => Ok(Json(output)),
         Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
@@ -150,6 +189,12 @@ async fn main() -> anyhow::Result<()> {
     if model.is_null() {
         anyhow::bail!("Failed to initialize C++ model.");
     }
+    
+    let path = Path::new(&args.model);
+    let model_name = Path::new(path)
+    .file_name()
+    .and_then(|n| n.to_str())
+    .unwrap_or("").to_string(); // Fallback if path is invalid or non-UTF8
 
     // 3. Prepare State
     let ctx = ModelContext { tokenizer, model };
@@ -160,10 +205,14 @@ async fn main() -> anyhow::Result<()> {
         let port = args.port;
         println!("Starting HTTP server on http://0.0.0.0:{}", port);
         
-        let shared_state = Arc::new(Mutex::new(ctx));
-
+        let shared_state = Arc::new(AppState {
+            name: model_name,
+            // Move the Mutex inside the struct
+            context: Mutex::new(ctx), 
+        });
+        
         let app = Router::new()
-            .route("/embeddings", post(embedding_handler))
+            .route("/v1/embeddings", post(embedding_handler))
             .with_state(shared_state);
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -189,7 +238,7 @@ async fn main() -> anyhow::Result<()> {
             buffer.trim().to_string()
         };
 
-        let output = compute_embeddings(&ctx, input_text)?;
+        let output = compute_embeddings(&ctx, input_text, model_name)?;
         let json_output = serde_json::to_string_pretty(&output)?;
         println!("{}", json_output);
     }
