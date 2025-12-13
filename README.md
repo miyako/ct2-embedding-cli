@@ -67,28 +67,6 @@ ct2-transformers-converter --model sentence-transformers/all-MiniLM-L6-v2 \
     --output_dir all-MiniLM-L6-v2_f16 \
     --quantization float16 \
     --force
-ct2-transformers-converter --model google/embeddinggemma-300m \
-    --output_dir embeddinggemma-300m2_f16 \
-    --quantization float16 \
-    --force
-```
-
-```
-mkdir medium
-ct2-transformers-converter \
-  --model sentence-transformers/paraphrase-multilingual-mpnet-base-v2 \
-  --output_dir medium \
-  --force \
-  --quantization int8
-```
-
-```
-mkdir large
-ct2-transformers-converter \
-  --model intfloat/multilingual-e5-large \
-  --output_dir large \
-  --force \
-  --quantization int8
 ```
 
 The converter script generates `3` files. You need to download `2` more:
