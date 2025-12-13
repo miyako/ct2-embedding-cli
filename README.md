@@ -52,7 +52,8 @@ pip install torch
 pip install ctranslate2 transformers
 ```
 
-*  nomic-ai/nomic-bert-2048=ERROR
+* nomic-ai/nomic-bert-2048=ERROR
+* google/embeddinggemma300m=ERROR 
 * all-MiniLM-L6-v2
 
 ```
