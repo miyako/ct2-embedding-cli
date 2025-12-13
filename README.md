@@ -66,6 +66,10 @@ ct2-transformers-converter --model sentence-transformers/all-MiniLM-L6-v2 \
     --output_dir all-MiniLM-L6-v2_f16 \
     --quantization float16 \
     --force
+ct2-transformers-converter --model google/embeddinggemma-300m \
+    --output_dir embeddinggemma-300m2_f16 \
+    --quantization float16 \
+    --force
 ```
 
 ```
