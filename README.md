@@ -52,6 +52,7 @@ pip install torch
 pip install ctranslate2 transformers
 ```
 
+*  nomic-ai/nomic-bert-2048=ERROR
 * all-MiniLM-L6-v2
 
 ```
