@@ -16,6 +16,7 @@ fn main() {
         println!("cargo:rustc-link-lib=static=cpu_features"); 
         println!("cargo:rustc-link-lib=static=ctranslate2"); 
         println!("cargo:rustc-link-lib=static=utils"); 
+        println!("cargo:rustc-link-lib=static=libcpmt"); 
     }
     
     let mut bridge = cxx_build::bridge("src/main.rs");
