@@ -29,15 +29,6 @@ Rust is used to tokenise input text. C++ is used to encode tokens and mean pool 
 
 Find a transformer based model on Hugging Face. 
 
-|Scale|Dimesnions|Model|Size on Disk|
-|-|-:|-|-:|
-|Large|`1024`|[intfloat/multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large)|`587.1 MB`|
-|Medium|`768`|[sentence-transformers/paraphrase-multilingual-mpnet-base-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2)|`296.2 MB`| 
-|Small|`384`|[sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)|`135.4 MB`| 
-
-> [!TIP]
-> Converted model are available in releases.
-
 You need to convert the model to `ct2` format. Optionally you might want to quantise the weights.
 
 Setup `ctranslate2` in `venv`.
