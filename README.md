@@ -91,7 +91,6 @@ cmake -S . -B build_arm \
     -DOPENBLAS_INCLUDE_DIR="..." \
     -DOPENBLAS_LIBRARY="..."
 cmake --build build_arm --config Release
-cargo build --release --target aarch64-apple-darwin
 ``` 
 
 remove `'-Xclang -fopenmp'` from other C++ flags.
@@ -114,7 +113,6 @@ cmake -S . -B build_amd \
     -DOPENBLAS_INCLUDE_DIR="..." \
     -DOPENBLAS_LIBRARY="..."
 cmake --build build_amd --config Release
-cargo build --release --target x86_64-apple-darwin
 ```
 
 ### Windows
