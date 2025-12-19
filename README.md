@@ -71,49 +71,29 @@ Now you can use the CLI.
 
 ## Developer Notes
 
-### Apple Silicon
+### macOS
 
 * Build Ctranslate2 with accelerate framework
 
 ```
-git clone https://github.com/OpenNMT/CTranslate2 --recursive
-cd CTranslate2
-cmake -S . -B build_arm \
+cmake -S . -B build_amd \
     -DCMAKE_BUILD_TYPE=Release \
     -DWITH_ACCELERATE=ON \
     -DWITH_MKL=OFF \
     -DENABLE_CPU_DISPATCH=OFF \
-    -DWITH_OPENBLAS=ON \
-    -DOPENMP_RUNTIME=COMP \
-    -DOpenMP_CXX_INCLUDE_DIR="..." \
-    -DOpenMP_CXX_INCLUDE_DIR="..." \
-    -DOpenMP_libomp_LIBRARY="..." \
-    -DOPENBLAS_INCLUDE_DIR="..." \
-    -DOPENBLAS_LIBRARY="..."
-cmake --build build_arm --config Release
-``` 
-
-remove `'-Xclang -fopenmp'` from other C++ flags.
-
-### Intel
-
+    -DWITH_OPENBLAS=OFF \
+    -DOPENMP_RUNTIME=NONE \
+     -DWITH_OPENMP=OFF \
+     -DBUILD_SHARED_LIBS=OFF \
+    -DOpenMP_CXX_INCLUDE_DIR=".../include" \
+    -DOpenMP_CXX_INCLUDE_DIR=".../include" \
+    -DOpenMP_libomp_LIBRARY=".../libomp.a" \
+    -DOPENBLAS_INCLUDE_DIR=".../include" \
+    -DOPENBLAS_LIBRARY=".../libopenblas.a" 
 ```
-git clone https://github.com/OpenNMT/CTranslate2 --recursive
-cd CTranslate2
-cmake -S . -B build_amd \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DWITH_ACCELERATE=OFF \
-    -DWITH_MKL=OFF \
-    -DENABLE_CPU_DISPATCH=OFF \
-    -DWITH_OPENBLAS=ON \
-    -DOPENMP_RUNTIME=COMP \
-    -DOpenMP_CXX_INCLUDE_DIR="..." \
-    -DOpenMP_CXX_INCLUDE_DIR="..." \
-    -DOpenMP_libomp_LIBRARY="..." \
-    -DOPENBLAS_INCLUDE_DIR="..." \
-    -DOPENBLAS_LIBRARY="..."
-cmake --build build_amd --config Release
-```
+
+> [!NOTE]
+> On macOS, Accelerate is often preferred over OpenMP/OpenBLAS for performance.
 
 ### Windows
 
