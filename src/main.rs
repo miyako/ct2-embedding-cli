@@ -1,9 +1,21 @@
-use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
+use axum::{
+    extract::{DefaultBodyLimit, State}, 
+    http::StatusCode, 
+    routing::post, 
+    Json, Router
+};
 use clap::Parser;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokenizers::Tokenizer;
+use tower::ServiceBuilder; // Added for middleware layering
+
+// --- Constants for Limits ---
+const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 2MB
+const MAX_CONCURRENT_REQUESTS: usize = 100;      // Max simultaneous model calls
+
+// ... (ffi bridge, structs, and ModelContext remain the same) ...
 
 #[cxx::bridge]
 mod ffi {
@@ -19,11 +31,8 @@ mod ffi {
     }
 }
 
-// Ensure the C++ Model is treated as thread-safe by Rust
 unsafe impl Send for ffi::EmbeddingModel {}
 unsafe impl Sync for ffi::EmbeddingModel {}
-
-// --- Data Structures ---
 
 #[derive(serde::Deserialize)]
 #[serde(untagged)]
@@ -62,13 +71,11 @@ struct EmbeddingData {
     object: String,
 }
 
-// Wrapper for the model and tokenizer
 pub struct ModelContext {
     tokenizer: Tokenizer,
     model: cxx::UniquePtr<ffi::EmbeddingModel>,
 }
 
-// Mark the wrapper as Sync so it can be shared across threads in Axum
 unsafe impl Send for ModelContext {}
 unsafe impl Sync for ModelContext {}
 
@@ -86,7 +93,6 @@ async fn embedding_handler(
     Json(payload): Json<EmbeddingRequest>,
 ) -> Result<Json<EmbeddingOutput>, (StatusCode, String)> {
     
-    // Move the heavy work to a blocking thread pool
     let ctx = Arc::clone(&state.ctx);
     let model_name = state.name.clone();
 
@@ -96,12 +102,12 @@ async fn embedding_handler(
             InputData::Batch(v) => v,
         };
 
+        // 1. Domain Logic Limit: Check batch size
         if inputs.is_empty() {
             return Err((StatusCode::BAD_REQUEST, "Input is empty".to_string()));
         }
 
-        // 1. Parallel Tokenization using Rayon
-        // This is crucial for "huge requests" (e.g. 100+ long documents)
+        // 2. Parallel Tokenization
         let encodings: Vec<_> = inputs
             .into_par_iter()
             .map(|text| {
@@ -121,11 +127,9 @@ async fn embedding_handler(
             total_tokens += ids.len();
         }
 
-        // 2. Batch Inference (C++)
-        // We pass the reference to the model inside the UniquePtr
+        // 3. Batch Inference (C++)
         let all_embeddings_flat = ctx.model.encode(&flat_ids, &lengths);
         
-        // 3. Post-process: Split the flat vector into individual embeddings
         let num_inputs = lengths.len();
         if num_inputs == 0 {
              return Err((StatusCode::INTERNAL_SERVER_ERROR, "Model returned no data".to_string()));
@@ -174,12 +178,10 @@ struct Args {
 async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    // 1. Load Tokenizer
     let tokenizer_path = PathBuf::from(&args.model).join("tokenizer.json");
     let tokenizer = Tokenizer::from_file(tokenizer_path)
         .map_err(|e| anyhow::anyhow!("Failed to load tokenizer: {}", e))?;
 
-    // 2. Load C++ Model
     println!("Loading model from {} on {}...", args.model, args.device);
     let model = ffi::new_embedding_model(&args.model, &args.device);
     if model.is_null() {
@@ -200,8 +202,18 @@ async fn main() -> anyhow::Result<()> {
             ctx: model_ctx,
         });
 
+        // Define our middleware stack
+        let middleware = ServiceBuilder::new()
+            // Limit 1: Global Concurrency (Backpressure)
+            // Only 10 requests will be processed at a time; others wait in queue
+            .layer(tower::limit::ConcurrencyLimitLayer::new(MAX_CONCURRENT_REQUESTS))
+            // Limit 2: Request Body Size (Security)
+            // Reject any request larger than 2MB immediately
+            .layer(DefaultBodyLimit::max(MAX_PAYLOAD_SIZE));
+
         let app = Router::new()
             .route("/v1/embeddings", post(embedding_handler))
+            .layer(middleware) // Apply limits to all routes
             .with_state(shared_state);
 
         let addr = std::net::SocketAddr::from(([0, 0, 0, 0], args.port));
