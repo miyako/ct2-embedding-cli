@@ -305,6 +305,7 @@ dependencies = [
  "cmake",
  "cxx",
  "cxx-build",
+ "rayon",
  "serde",
  "serde_json",
  "tokenizers",
