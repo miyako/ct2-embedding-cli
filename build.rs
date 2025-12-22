@@ -8,7 +8,8 @@ fn main() {
         println!("cargo:rustc-link-lib=static=openblas");
         println!("cargo:rustc-link-lib=static=spdlog");
         println!("cargo:rustc-link-arg=-framework");
-        println!("cargo:rustc-link-arg=Accelerate");        
+        println!("cargo:rustc-link-arg=Accelerate");    
+        println!("cargo:rustc-link-lib=static=cpu_features");      
     } 
     
     if cfg!(target_env = "msvc") {
